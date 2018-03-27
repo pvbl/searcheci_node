@@ -13,118 +13,40 @@
 
 'use strict';
 
-process.env.DEBUG = 'actions-on-google:*';
-const { DialogflowApp } = require('actions-on-google');
-const functions = require('firebase-functions');
+const request = require('request');
+// const strings = require('./strings');
 
-const strings = require('./strings');
+const parameters = {
+          'item': 'samsung',
+          'limit':10
+        }
 
-process.env.DEBUG = 'actions-on-google:*';
+const callback = data => {  console.log(data);};
 
-
-
-
-const Actions =  {
-  UNRECOGNIZED_DEEP_LINK: 'deeplink.unknown',
-  PRODUCT_SEARCH:'product.search',
-  SPECIAL_OFFERS: 'special.offers',
-  WELCOME:'welcome.input'
-	
-}
-
-/** Dialogflow Parameters {@link https://dialogflow.com/docs/actions-and-parameters#parameters} */
-const Parameters = {
-  ITEM: 'item',
-  CONTACT:'contact',
-  PRICE_MIN: 'price_min',
-  PRICE_MAX: 'price_max',
-  DISCOUNT: 'discount'
-};
-/** Dialogflow Contexts {@link https://dialogflow.com/docs/contexts} */
-const Contexts = {
-  PRODUCT_SEARCH: 'productsearch-followup',
-};
-/** Dialogflow Context Lifespans {@link https://dialogflow.com/docs/contexts#lifespan} */
-const Lifespans = {
-  DEFAULT: 5,
-  END: 0
-};
-
-
-
-var options = {
-       uri: 'https://search-eci.herokuapp.com/searcheci',
-       method: 'POST',
-       json: {
-         "result": {
-	         "parameters": Parameters
-	      }
+function welcome(parameters,callback) {
+  var options = {
+    uri: 'http://35.204.234.28:5000/searcheci',
+    method: 'POST',
+    json: {
+      'result': {
+        'parameters': parameters
+        
+      }
     }
-}
+  };
 
-
-
-
-
-const callback = data=> {
-    console.log(data);
-}
-
-
-
-const getJson = parameters => {
-	var options = {
-		   uri: 'https://search-eci.herokuapp.com/searcheci',
-		   method: 'POST',
-		   json: {
-			 "result": {
-				 "parameters": Parameters
-			  }
-		}
+  request(options, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+		if(body[0]['name']){
+      console.log(body[0]['name']);
+    }
+    else{
+		console.log('paco');
 	}
-	
-   	request(options, function (error, response, body) {
-	if (!error && response.statusCode == 200) {
-		   callback(body);
-	   }
-	else
-		console.log(error);
-	})  
-	
-}
-
-
-//getJson(Parameters)
-
-const welcome = app => app.tell('Hello, World!');
-
-
-
-
-
-
-/** @type {Map<string, function(DialogflowApp): void>} */
-const actionMap = new Map();
-actionMap.set(Actions.WELCOME, welcome);
-/*actionMap.set(Actions.UNRECOGNIZED_DEEP_LINK, unhandledDeepLinks);
-actionMap.set(Actions.TELL_FACT, tellFact);
-actionMap.set(Actions.TELL_CAT_FACT, tellCatFact);
-*/
-
-/**
- * The entry point to handle a http request
- * @param {Request} request An Express like Request object of the HTTP request
- * @param {Response} response An Express like Response object to send back data
- */
-const shopping = functions.https.onRequest((request, response) => {
-  const app = new DialogflowApp({ request, response });
-  console.log(`Request headers: ${JSON.stringify(request.headers)}`);
-  console.log(`Request body: ${JSON.stringify(request.body)}`);
-  // Fulfill action business logic
-  app.handleRequest(actionMap);
-});
-
-module.exports = {
-  shopping
+      //callback(JSON.stringify(body));
+    } else { console.log(error); }
+  });
 };
 
+welcome(parameters,callback)
+// const welcome = app => app.tell('Hello, World!');

@@ -23,8 +23,6 @@
 // eslint-disable-next-line quotes
 const deepFreeze = require('deep-freeze');
 
-
-
 const general = {
   "heardItAll": "Te he enseñado todos los productos que me has pedido. ¿Quieres que sigamos viendo otros?",
   /** Used to give responses for no inputs */
