@@ -15,12 +15,24 @@
 
 const request = require('request');
 // const strings = require('./strings');
-//process.env.DEBUG = 'actions-on-google:*';
-//const { DialogflowApp } = require('actions-on-google');
+process.env.DEBUG = 'actions-on-google:*';
+const Assistant = require('actions-on-google').ApiAiAssistant;
 
 const express = require('express');
 const bodyParser = require('body-parser');
 const http = require('http');
+
+
+
+const Actions = {
+  UNRECOGNIZED_DEEP_LINK: 'deeplink.unknown',
+  PRODUCT_SEARCH: 'product.search',
+  SPECIAL_OFFERS: 'special.offers',
+  WELCOME: 'input.welcome'
+
+};
+
+
 
 const server = express();
 server.use(bodyParser.urlencoded({
@@ -32,17 +44,13 @@ server.use(bodyParser.json());
 
 
 
+//const actionMap = new Map();
+//actionMap.set(Actions.WELCOME, welcome);
 
 
 //const callback = data => {  console.log(data);};
 
-
-
-server.post('/searcheci', function (req, res) {
-
-    //let movieToSearch = req.body.result && req.body.result.parameters && req.body.result.parameters.movie ? req.body.result.parameters.movie : 'The Godfather';
-    
-      var options = {
+const options = {
         uri: 'https://search-eci.herokuapp.com/searcheci',
         method: 'POST',
         json: {
@@ -56,15 +64,42 @@ server.post('/searcheci', function (req, res) {
         }
       };
 
+server.post('/searcheci', function (req, res) {
+    //const app = new DialogflowApp({request=req, response=res});
+    //let movieToSearch = req.body.result && req.body.result.parameters && req.body.result.parameters.movie ? req.body.result.parameters.movie : 'The Godfather';
+    const assistant = new Assistant({request: req, response: res});
+      
+    function responseHandler (assistant) { 
       request(options, function (errorAPI, responseAPI, bodyAPI) {
         if (!errorAPI && responseAPI.statusCode == 200) {
-            res.json(bodyAPI)
+            //res.json(bodyAPI[0]);
+            assistent.tell(bodyAPI[0]['name']);
+            /*
+            return res.json({
+                speech: bodyAPI[0]['name'],
+                displayText: bodyAPI[0]['name'],
+                source: 'get-movie-details'
+            }); */
+
           //callback(JSON.stringify(body));
-        } else { console.log(errorAPI); }
+        } else { 
+			assistent.tell('Error');
+            /* return res.json({
+            speech: 'Something went wrong!',
+            displayText: 'Something went wrong!',
+            source: 'get-movie-details'
+                });
+               */
+            //console.log(errorAPI); 
+            }; 
       });
-    
+    };
 
 });
+
+
+
+
 
 server.listen((process.env.PORT || 8000), function () {
     console.log("Server is up and running...");
