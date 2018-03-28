@@ -15,38 +15,58 @@
 
 const request = require('request');
 // const strings = require('./strings');
+//process.env.DEBUG = 'actions-on-google:*';
+//const { DialogflowApp } = require('actions-on-google');
 
-const parameters = {
-          'item': 'samsung',
-          'limit':10
+const express = require('express');
+const bodyParser = require('body-parser');
+const http = require('http');
+
+const server = express();
+server.use(bodyParser.urlencoded({
+    extended: true
+}));
+
+server.use(bodyParser.json());
+
+
+
+
+
+
+//const callback = data => {  console.log(data);};
+
+
+
+server.post('/searcheci', function (req, res) {
+
+    //let movieToSearch = req.body.result && req.body.result.parameters && req.body.result.parameters.movie ? req.body.result.parameters.movie : 'The Godfather';
+    
+      var options = {
+        uri: 'https://search-eci.herokuapp.com/searcheci',
+        method: 'POST',
+        json: {
+          'result': {
+            'parameters': {
+              'item': 'samsung',
+              'limit':2
+            }
+            
+          }
         }
+      };
 
-const callback = data => {  console.log(data);};
+      request(options, function (errorAPI, responseAPI, bodyAPI) {
+        if (!errorAPI && responseAPI.statusCode == 200) {
+            res.json(bodyAPI)
+          //callback(JSON.stringify(body));
+        } else { console.log(errorAPI); }
+      });
+    
 
-function welcome(parameters,callback) {
-  var options = {
-    uri: 'http://35.204.234.28:5000/searcheci',
-    method: 'POST',
-    json: {
-      'result': {
-        'parameters': parameters
-        
-      }
-    }
-  };
+});
 
-  request(options, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-		if(body[0]['name']){
-      console.log(body[0]['name']);
-    }
-    else{
-		console.log('paco');
-	}
-      //callback(JSON.stringify(body));
-    } else { console.log(error); }
-  });
-};
+server.listen((process.env.PORT || 8000), function () {
+    console.log("Server is up and running...");
+});
 
-welcome(parameters,callback)
-// const welcome = app => app.tell('Hello, World!');
